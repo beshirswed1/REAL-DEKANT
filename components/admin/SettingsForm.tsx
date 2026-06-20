@@ -1085,6 +1085,14 @@ export default function SettingsForm({ initialConfig }: SettingsFormProps) {
                 disabled={saving}
                 hint="Ülke kodu ile, boşluksuz yazınız (örn: 905551234567)"
               />
+              <SettingsInput
+                id="contact-email"
+                label="İletişim E-posta Adresi"
+                value={contactEmail}
+                onChange={setContactEmail}
+                placeholder="info@realdekant.com"
+                disabled={saving}
+              />
               <SettingsInput id="contact-working-hours" label="Çalışma Saatleri" value={contactWorkingHours} onChange={setContactWorkingHours} placeholder="Pazartesi - Cumartesi: 09:00 - 18:00" disabled={saving} />
               <SettingsInput
                 id="contact-maps-url"

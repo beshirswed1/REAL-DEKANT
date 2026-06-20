@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -11,7 +11,7 @@ import { useCart } from "@/hooks/useCart";
 import { doc, getDoc, setDoc, updateDoc, increment, serverTimestamp } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase/config";
 import { signInAnonymously } from "firebase/auth";
-import { FiCheck, FiChevronRight, FiCreditCard, FiDollarSign, FiMail, FiMapPin, FiPhone, FiShoppingBag, FiUser, FiInfo } from "react-icons/fi";
+import { FiCheck, FiChevronRight, FiDollarSign, FiMail, FiMapPin, FiPhone, FiShoppingBag, FiUser, FiInfo } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import Image from "next/image";
 import { getOptimizedImage } from "@/lib/imgbb/config";
@@ -280,9 +280,9 @@ export default function CheckoutPage() {
   const submittingRef = useRef(false);
   const orderSubmittedRef = useRef(false);
 
-  // iyzico Checkout Form State
-  const [iyzicoHtml, setIyzicoHtml] = useState<string | null>(null);
-  const [loadingPaymentForm, setLoadingPaymentForm] = useState(false);
+  // iyzico Checkout Form State (commented out to avoid eslint errors)
+  // const [iyzicoHtml, setIyzicoHtml] = useState<string | null>(null);
+  // const [loadingPaymentForm, setLoadingPaymentForm] = useState(false);
 
   // Calculate dynamic fees
   const codFee = paymentMethod === "cod" ? codServiceFee : 0;
