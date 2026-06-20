@@ -1,0 +1,102 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helper functions ───────────────────────────────────────────────────
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isValidProduct() {
+      let d = request.resource.data;
+      return d.keys().hasAll([
+        'sku', 'brand', 'perfumeName', 'slug', 'gender',
+        'prices', 'scentFamily', 'notes', 'longevity', 'sillage',
+        'season', 'images', 'isPublished', 'isFeatured', 'isNew',
+        'soldCount', 'tags'
+      ]);
+    }
+
+    function isValidOrder() {
+      let d = request.resource.data;
+      return d.keys().hasAll([
+        'orderId', 'userId', 'customer', 'items',
+        'subtotal', 'shippingFee', 'total',
+        'paymentMethod', 'orderStatus'
+      ]);
+    }
+
+    // ─── /products ──────────────────────────────────────────────────────────
+    // Anyone can read published products; only admins can write.
+    match /products/{productId} {
+      allow read: if resource.data.isPublished == true || isAdmin();
+      allow create: if isAdmin() && isValidProduct();
+      allow update: if isAdmin() && isValidProduct();
+      allow delete: if isAdmin();
+    }
+
+    // ─── /orders ────────────────────────────────────────────────────────────
+    // A customer can create and read their own orders.
+    // Admins can read and update any order.
+    match /orders/{orderId} {
+      allow read: if isAdmin() ||
+        (isSignedIn() && resource.data.userId == request.auth.uid);
+
+      allow create: if isSignedIn() &&
+        request.resource.data.userId == request.auth.uid &&
+        isValidOrder();
+
+      // Customer can cancel their own pending order
+      allow update: if isAdmin() ||
+        (isSignedIn() &&
+         resource.data.userId == request.auth.uid &&
+         resource.data.orderStatus == 'pending' &&
+         request.resource.data.orderStatus == 'cancelled');
+
+      allow delete: if isAdmin();
+    }
+
+    // ─── /users ─────────────────────────────────────────────────────────────
+    // Each user can read/write their own document.
+    // Only admins can change the 'role' field.
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+
+      allow create: if isOwner(uid) &&
+        // Prevent self-elevation to admin on creation
+        request.resource.data.role == 'customer';
+
+      allow update: if isOwner(uid) &&
+        // Block changing the role field
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])
+        || isAdmin();
+
+      allow delete: if isAdmin();
+
+      // Subcollection for user cart items
+      match /cart/{documentId} {
+        allow read, write: if isOwner(uid) || isAdmin();
+      }
+    }
+
+    // ─── /coupons ───────────────────────────────────────────────────────────
+    // Any signed-in user can read active coupons (for validation at checkout).
+    // Only admins can write.
+    match /coupons/{couponId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+  }
+}

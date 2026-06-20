@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gold: #D4AF37;
+  --gold-light: #C9A84C;
+  --gold-dark: #B8960C;
+  
+  --charcoal: #0D0D0D;
+  --charcoal-medium: #1A1A1A;
+  --charcoal-light: #2A2A2A;
+  
+  --cream: #F8F3E8;
+  --cream-dark: #EDE5D0;
+  --cream-light: #FAF7F0;
+  
+  --amber-deep: #8B6914;
+}
+
+body {
+  color: var(--charcoal);
+  background: var(--cream-light);
+  font-family: var(--font-montserrat), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-playfair), serif;
+  letter-spacing: 0.05em;
+}
+
+.brand-name {
+  font-family: var(--font-playfair), serif;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.tagline {
+  font-family: var(--font-dancing), cursive;
+}
+
+@layer components {
+  /* Luxury Button: Gold Outline */
+  .btn-luxury-outline {
+    @apply border border-gold text-gold px-6 py-3 tracking-widest text-xs uppercase font-montserrat transition-all duration-300 bg-transparent hover:bg-gold hover:text-charcoal active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  
+  /* Luxury Button: Gold Fill */
+  .btn-luxury-fill {
+    @apply bg-gold text-charcoal border border-gold px-6 py-3 tracking-widest text-xs uppercase font-montserrat transition-all duration-300 hover:bg-gold-dark hover:border-gold-dark active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  /* Luxury Button: Cream Fill */
+  .btn-luxury-cream {
+    @apply bg-cream border border-cream-dark text-charcoal px-6 py-3 tracking-widest text-xs uppercase font-montserrat transition-all duration-300 hover:bg-cream-dark active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  /* Luxury Button: Dark Fill */
+  .btn-luxury-dark {
+    @apply bg-charcoal text-cream-light border border-charcoal px-6 py-3 tracking-widest text-xs uppercase font-montserrat transition-all duration-300 hover:bg-charcoal-medium hover:border-charcoal-medium active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  /* Subtle Shimmer Gold text/border background */
+  .gold-shimmer-text {
+    background: linear-gradient(
+      to right,
+      #B8960C 20%,
+      #D4AF37 40%,
+      #FAF7F0 50%,
+      #D4AF37 60%,
+      #B8960C 80%
+    );
+    background-size: 200% auto;
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    @apply animate-shimmer;
+  }
+}
+
