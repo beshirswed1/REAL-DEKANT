@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebase-admin";
+import { rateLimit, getClientIp } from "@/lib/rate-limiter";
 
 const SESSION_DURATION = 60 * 60 * 24 * 7 * 1000; // 7 days in ms
 
 export async function POST(req: NextRequest) {
+  // ─── Rate Limiting: max 5 login attempts per minute per IP ────────────────
+  const clientIp = getClientIp(req.headers);
+  const { limited } = rateLimit(`admin-login:${clientIp}`, 5, 60_000);
+  if (limited) {
+    return NextResponse.json(
+      { error: "Çok fazla giriş denemesi. Lütfen bir dakika bekleyin." },
+      { status: 429 }
+    );
+  }
+
   try {
     const { idToken } = await req.json();
 

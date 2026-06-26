@@ -32,7 +32,18 @@ interface ContactClientProps {
 }
 
 export default function ContactClient({ config }: ContactClientProps) {
-  const cleanWhatsappNumber = config.contactWhatsapp.replace(/[^\d+]/g, "");
+  let cleanWhatsappNumber = (config.contactWhatsapp || "").replace(/\D/g, "");
+  if (cleanWhatsappNumber.startsWith("00")) {
+    cleanWhatsappNumber = cleanWhatsappNumber.substring(2);
+  } else if (cleanWhatsappNumber.startsWith("0")) {
+    cleanWhatsappNumber = cleanWhatsappNumber.substring(1);
+  }
+  if (cleanWhatsappNumber.length === 10 && cleanWhatsappNumber.startsWith("5")) {
+    cleanWhatsappNumber = "90" + cleanWhatsappNumber;
+  }
+  if (cleanWhatsappNumber.length === 13 && cleanWhatsappNumber.startsWith("9005")) {
+    cleanWhatsappNumber = "90" + cleanWhatsappNumber.substring(3);
+  }
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
@@ -75,8 +86,12 @@ export default function ContactClient({ config }: ContactClientProps) {
       const encodedText = encodeURIComponent(textMessage);
       const whatsappUrl = `https://wa.me/${cleanWhatsappNumber}?text=${encodedText}`;
 
-      // Open in a new tab
-      window.open(whatsappUrl, "_blank");
+      // Open in same tab to bypass popup blockers on mobile
+      try {
+        window.location.href = whatsappUrl;
+      } catch (e) {
+        console.warn("WhatsApp redirect failed", e);
+      }
 
       // Show success toast
       showToast("Mesajınız kaydedildi. WhatsApp'a yönlendiriliyorsunuz...", "success");
@@ -94,7 +109,11 @@ export default function ContactClient({ config }: ContactClientProps) {
       const encodedText = encodeURIComponent(textMessage);
       const whatsappUrl = `https://wa.me/${cleanWhatsappNumber}?text=${encodedText}`;
       setTimeout(() => {
-        window.open(whatsappUrl, "_blank");
+        try {
+          window.location.href = whatsappUrl;
+        } catch (e) {
+          console.warn("WhatsApp fallback redirect failed", e);
+        }
       }, 1500);
     } finally {
       setLoading(false);
@@ -112,7 +131,7 @@ export default function ContactClient({ config }: ContactClientProps) {
           <span className="font-montserrat text-xs sm:text-sm tracking-[0.45em] text-[#C9A84C] uppercase block animate-pulse">
             BİZE ULAŞIN
           </span>
-          <h1 className="font-playfair text-4xl sm:text-6xl font-bold tracking-[0.08em] uppercase text-white leading-tight">
+          <h1 className="font-playfair text-2xl sm:text-4xl md:text-6xl font-bold tracking-[0.08em] uppercase text-white leading-tight">
             İLETİŞİM KANALLARI
           </h1>
           <div className="h-[1px] w-24 bg-[#C9A84C]/50 mx-auto my-6" />
@@ -404,7 +423,7 @@ export default function ContactClient({ config }: ContactClientProps) {
       {/* Toast Overlay */}
       {toast && (
         <div 
-          className={`fixed bottom-6 right-6 z-[999] flex items-center gap-3 px-6 py-4 rounded-2xl border text-sm font-semibold tracking-wider font-montserrat shadow-xl animate-fade-in ${
+          className={`fixed bottom-4 left-4 right-4 sm:bottom-6 sm:right-6 sm:left-auto z-[999] flex items-center gap-3 px-4 sm:px-6 py-3 sm:py-4 rounded-xl sm:rounded-2xl border text-xs sm:text-sm font-semibold tracking-wider font-montserrat shadow-xl animate-fade-in ${
             toast.type === "success" 
               ? "bg-[#0D0D0D] border-[#C9A84C] text-[#F8F3E8]" 
               : "bg-red-950 border-red-500 text-red-200"

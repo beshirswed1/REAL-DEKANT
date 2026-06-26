@@ -35,6 +35,9 @@ export function useAuthInit() {
         dispatch(clearUser());
         return;
       }
+      // Set auth cookie immediately to prevent race conditions with middleware and ensure it is set even if Firestore query fails
+      document.cookie = `rd_auth=true; path=/; max-age=${60 * 60 * 24 * 7}; samesite=lax`;
+
       try {
         const userRef = doc(db, "users", firebaseUser.uid);
         const userSnap = await getDoc(userRef);
@@ -58,9 +61,6 @@ export function useAuthInit() {
           role = data.role || "customer";
           displayName = data.displayName || firebaseUser.displayName;
         }
-
-        // Set auth cookie
-        document.cookie = `rd_auth=true; path=/; max-age=${60 * 60 * 24 * 7}; samesite=lax`;
 
         const authUser: AuthUser = {
           uid: firebaseUser.uid,

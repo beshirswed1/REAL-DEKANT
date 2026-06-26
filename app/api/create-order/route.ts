@@ -1,20 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { adminDb as db, isMock } from "@/lib/firebase-admin";
 import * as admin from "firebase-admin";
+import { invalidateCouponCache } from "@/lib/coupon-cache";
+import { rateLimit, getClientIp } from "@/lib/rate-limiter";
 
-const hasAdminCreds = !!(process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY);
 
-// Initialize Firebase Admin only if credentials are provided in the environment
-if (hasAdminCreds && !admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "realdekant",
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, "\n"),
-    }),
-  });
-}
-
-const db = hasAdminCreds ? admin.firestore() : null;
+const hasAdminCreds = !isMock;
 
 // Helper to generate readable Order ID
 function generateOrderId(): string {
@@ -46,6 +37,16 @@ interface CheckoutItem {
 }
 
 export async function POST(req: NextRequest) {
+  // ─── Rate Limiting: max 5 orders per minute per IP ────────────────────────
+  const clientIp = getClientIp(req.headers);
+  const { limited } = rateLimit(`order:${clientIp}`, 5, 60_000);
+  if (limited) {
+    return NextResponse.json(
+      { success: false, message: "Çok fazla istek gönderdiniz. Lütfen bir dakika bekleyin." },
+      { status: 429 }
+    );
+  }
+
   if (!hasAdminCreds || !db) {
     return NextResponse.json({
       success: false,
@@ -174,6 +175,14 @@ export async function POST(req: NextRequest) {
       });
     });
 
+    if (couponCode) {
+      try {
+        invalidateCouponCache(couponCode);
+      } catch (cacheErr) {
+        console.warn("Failed to invalidate coupon cache:", cacheErr);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       orderId,
@@ -185,7 +194,7 @@ export async function POST(req: NextRequest) {
     console.error("Order creation error:", err);
     return NextResponse.json({
       success: false,
-      message: err.message || "Sipariş oluşturulurken bir hata oluştu.",
+      message: "Sipariş oluşturulurken bir hata oluştu. Lütfen bilgilerinizi kontrol edip tekrar deneyin.",
     }, { status: 500 });
   }
 }
@@ -202,7 +211,7 @@ function generateEmailHtml(
   paymentMethod: string
 ): string {
   const methodNames: Record<string, string> = {
-    credit_card: "Kredi Kartı (iyzico)",
+    credit_card: "Kredi Kartı",
     bank_transfer: "Banka Havalesi / EFT",
     cod: "Kapıda Ödeme",
     whatsapp: "WhatsApp ile Sipariş",

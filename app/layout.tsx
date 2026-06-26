@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Montserrat, Dancing_Script } from "next/font/google";
-import { headers } from "next/headers";
 import "./globals.css";
 import { ReduxProvider } from "@/store/provider";
-import RootLayoutWrapper from "@/components/layout/RootLayout";
-import { adminDb } from "@/lib/firebase-admin";
-import type { SiteConfig } from "@/components/admin/SettingsForm";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -89,38 +85,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const headersList = await headers();
-  const pathname = headersList.get("x-pathname") || "";
-  const isAdmin = pathname.startsWith("/admin");
-
-  let settingsConfig: SiteConfig | null = null;
-  if (!isAdmin) {
-    try {
-      const docSnap = await adminDb.collection("settings").doc("config").get();
-      if (docSnap.exists) {
-        settingsConfig = JSON.parse(JSON.stringify(docSnap.data())) as SiteConfig;
-      }
-    } catch (error) {
-      console.warn("Failed to fetch settings config in RootLayout:", error);
-    }
-  }
-
   return (
-    <html lang="tr" dir="ltr">
+    <html lang="tr" dir="ltr" suppressHydrationWarning>
       <body
-        className={`${playfair.variable} ${montserrat.variable} ${dancing.variable} antialiased${isAdmin ? "" : " bg-cream-light text-charcoal"}`}
+        className={`${playfair.variable} ${montserrat.variable} ${dancing.variable} antialiased`}
+        suppressHydrationWarning
       >
         <ReduxProvider>
-          {isAdmin ? (
-            children
-          ) : (
-            <RootLayoutWrapper config={settingsConfig}>{children}</RootLayoutWrapper>
-          )}
+          {children}
         </ReduxProvider>
       </body>
     </html>

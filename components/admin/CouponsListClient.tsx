@@ -227,8 +227,8 @@ export default function CouponsListClient({ initialCoupons }: CouponsListClientP
                 <tr>
                   <th className="px-6 py-4 border-b border-black/5">Kupon Kodu</th>
                   <th className="px-6 py-4 border-b border-black/5">İndirim</th>
-                  <th className="px-6 py-4 border-b border-black/5">Kullanım</th>
-                  <th className="px-6 py-4 border-b border-black/5">Son Kullanma</th>
+                  <th className="px-6 py-4 border-b border-black/5 hidden md:table-cell">Kullanım</th>
+                  <th className="px-6 py-4 border-b border-black/5 hidden md:table-cell">Son Kullanma</th>
                   <th className="px-6 py-4 border-b border-black/5">Durum</th>
                   <th className="px-6 py-4 border-b border-black/5 text-right">İşlemler</th>
                 </tr>
@@ -239,6 +239,11 @@ export default function CouponsListClient({ initialCoupons }: CouponsListClientP
                     <td className="px-6 py-4">
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#D4AF37]/10 text-[#B8960C] font-mono font-bold tracking-wider">
                         {coupon.code}
+                      </div>
+                      {/* Mobile-only info (Usage & Expiry) */}
+                      <div className="flex flex-col gap-1 mt-1 md:hidden text-[11px] text-gray-500 font-sans font-normal">
+                        <span>Kullanım: {coupon.usageCount} / {coupon.maxUsage === 0 ? "Sınırsız" : coupon.maxUsage}</span>
+                        <span>Son Kullanma: {formatDate(coupon.expiresAt)}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -257,7 +262,7 @@ export default function CouponsListClient({ initialCoupons }: CouponsListClientP
                           : "Kargo"}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 hidden md:table-cell">
                       <div className="flex flex-col gap-1.5">
                         <span className="text-xs font-semibold text-[#1a1a1a]">
                           {coupon.usageCount} <span className="text-[#888] font-normal">/ {coupon.maxUsage === 0 ? "Sınırsız" : coupon.maxUsage}</span>
@@ -274,7 +279,7 @@ export default function CouponsListClient({ initialCoupons }: CouponsListClientP
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 hidden md:table-cell">
                       <div className="text-[#666] font-medium">
                         {formatDate(coupon.expiresAt)}
                       </div>

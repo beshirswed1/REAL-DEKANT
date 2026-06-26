@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
+import { rateLimit, getClientIp } from "@/lib/rate-limiter";
 
 export async function POST(req: NextRequest) {
+  // ─── Rate Limiting: max 3 messages per minute per IP ──────────────────────
+  const clientIp = getClientIp(req.headers);
+  const { limited } = rateLimit(`contact:${clientIp}`, 3, 60_000);
+  if (limited) {
+    return NextResponse.json(
+      { error: "Çok fazla mesaj gönderdiniz. Lütfen bir dakika bekleyin." },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await req.json();
     const { name, subject, message } = body;

@@ -18,12 +18,49 @@
   --amber-deep: #8B6914;
 }
 
+/* ─── Smooth Scrolling (respects user preference) ─── */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 body {
   color: var(--charcoal);
   background: var(--cream-light);
   font-family: var(--font-montserrat), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Safe area for notched devices */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  /* Prevent horizontal overflow on mobile */
+  overflow-x: hidden;
+  /* Better touch scrolling */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Touch target minimum sizes ─── */
+@media (pointer: coarse) {
+  button, a, [role="button"], input[type="checkbox"], input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  /* Exceptions for inline small links inside text */
+  p a, span a, li a, td a {
+    min-height: auto;
+    min-width: auto;
+  }
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -79,4 +116,14 @@ h1, h2, h3, h4, h5, h6 {
     @apply animate-shimmer;
   }
 }
+
+/* ─── Hide scrollbar utility ─── */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 

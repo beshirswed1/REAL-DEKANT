@@ -48,44 +48,61 @@ export default function HeroCarousel({ slidesData }: HeroCarouselProps) {
   const activeSlides = slidesData && slidesData.length > 0 ? slidesData : DEFAULT_SLIDES;
 
   const [current, setCurrent] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [textVisible, setTextVisible] = useState(true);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
   const isPaused = useRef(false);
+  const isTransitioningRef = useRef(false);
 
   const goToSlide = useCallback(
     (index: number) => {
-      if (isTransitioning) return;
-      setIsTransitioning(true);
-      setCurrent(index);
-      setTimeout(() => setIsTransitioning(false), 800);
+      if (isTransitioningRef.current) return;
+      isTransitioningRef.current = true;
+
+      // Fade out text
+      setTextVisible(false);
+
+      // After text fades out, change slide and fade text back in
+      setTimeout(() => {
+        setCurrent(index);
+        // Small delay to let React commit the DOM update before fading in
+        requestAnimationFrame(() => {
+          setTextVisible(true);
+          setTimeout(() => {
+            isTransitioningRef.current = false;
+          }, 500);
+        });
+      }, 300);
     },
-    [isTransitioning]
+    []
   );
 
-  const nextSlide = useCallback(() => {
-    goToSlide((current + 1) % activeSlides.length);
-  }, [current, goToSlide, activeSlides.length]);
 
-  const prevSlide = useCallback(() => {
-    goToSlide((current - 1 + activeSlides.length) % activeSlides.length);
-  }, [current, goToSlide, activeSlides.length]);
 
   // Auto-rotation
   useEffect(() => {
-    const startInterval = () => {
-      intervalRef.current = setInterval(() => {
-        if (!isPaused.current) {
-          setCurrent((prev) => {
-            const next = (prev + 1) % activeSlides.length;
-            return next;
-          });
-        }
-      }, 5500);
-    };
+    intervalRef.current = setInterval(() => {
+      if (!isPaused.current && !isTransitioningRef.current) {
+        setCurrent((prev) => {
+          const next = (prev + 1) % activeSlides.length;
+          // Use the transition-safe approach
+          isTransitioningRef.current = true;
+          setTextVisible(false);
+          setTimeout(() => {
+            setCurrent(next);
+            requestAnimationFrame(() => {
+              setTextVisible(true);
+              setTimeout(() => {
+                isTransitioningRef.current = false;
+              }, 500);
+            });
+          }, 300);
+          return prev; // Keep current until timeout fires
+        });
+      }
+    }, 5500);
 
-    startInterval();
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
@@ -103,8 +120,11 @@ export default function HeroCarousel({ slidesData }: HeroCarouselProps) {
   const handleTouchEnd = () => {
     const diff = touchStartX.current - touchEndX.current;
     if (Math.abs(diff) > 50) {
-      if (diff > 0) nextSlide();
-      else prevSlide();
+      if (diff > 0) {
+        goToSlide((current + 1) % activeSlides.length);
+      } else {
+        goToSlide((current - 1 + activeSlides.length) % activeSlides.length);
+      }
     }
   };
 
@@ -156,12 +176,15 @@ export default function HeroCarousel({ slidesData }: HeroCarouselProps) {
 
           {/* Right: Text Panel */}
           <div className="flex items-center justify-center px-5 sm:px-10 lg:px-16 py-7 sm:py-10 md:py-0">
-            <div className="text-center md:text-left max-w-md space-y-3 sm:space-y-5 relative z-10">
+            <div
+              className={`text-center md:text-left max-w-md space-y-3 sm:space-y-5 relative z-10 transition-opacity duration-300 ease-in-out ${
+                textVisible ? "opacity-100" : "opacity-0"
+              }`}
+            >
               {/* Label */}
               <div className="overflow-hidden">
                 <span
-                  key={`label-${current}`}
-                  className="font-montserrat text-[10px] sm:text-xs tracking-[0.45em] text-[#C9A84C] uppercase block animate-fade-in"
+                  className="font-montserrat text-[10px] sm:text-xs tracking-[0.45em] text-[#C9A84C] uppercase block"
                 >
                   {currentSlide.label}
                 </span>
@@ -170,9 +193,7 @@ export default function HeroCarousel({ slidesData }: HeroCarouselProps) {
               {/* Headline */}
               <div className="overflow-hidden">
                 <h1
-                  key={`headline-${current}`}
-                  className="font-playfair text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-[0.06em] text-[#F8F3E8] uppercase leading-[1.15] whitespace-pre-line animate-fade-in"
-                  style={{ animationDelay: "100ms" }}
+                  className="font-playfair text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-[0.06em] text-[#F8F3E8] uppercase leading-[1.15] whitespace-pre-line"
                 >
                   {currentSlide.headline}
                 </h1>
@@ -181,20 +202,14 @@ export default function HeroCarousel({ slidesData }: HeroCarouselProps) {
               {/* Subtitle */}
               <div className="overflow-hidden">
                 <p
-                  key={`subtitle-${current}`}
-                  className="font-dancing text-lg sm:text-2xl text-[#C9A84C] italic animate-fade-in"
-                  style={{ animationDelay: "200ms" }}
+                  className="font-dancing text-lg sm:text-2xl text-[#C9A84C] italic"
                 >
                   &ldquo;{currentSlide.subtitle}&rdquo;
                 </p>
               </div>
 
               {/* CTA */}
-              <div
-                key={`cta-${current}`}
-                className="pt-2 sm:pt-4 animate-fade-in"
-                style={{ animationDelay: "300ms" }}
-              >
+              <div className="pt-2 sm:pt-4">
                 <Link
                   href={currentSlide.ctaLink}
                   className="inline-block btn-luxury-outline px-6 py-3 sm:px-8 sm:py-4 text-[9px] sm:text-[10px] tracking-[0.25em] hover:text-[#FAF7F0] hover:bg-gold"
@@ -228,7 +243,7 @@ export default function HeroCarousel({ slidesData }: HeroCarouselProps) {
 
       {/* Arrow Navigation — Desktop Only */}
       <button
-        onClick={prevSlide}
+        onClick={() => goToSlide((current - 1 + activeSlides.length) % activeSlides.length)}
         className="hidden md:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center border border-[#C9A84C]/25 text-[#F8F3E8]/60 hover:text-[#C9A84C] hover:border-[#C9A84C]/60 transition-all duration-300 rounded-full backdrop-blur-sm bg-[#0D0D0D]/30"
         aria-label="Previous slide"
       >
@@ -237,7 +252,7 @@ export default function HeroCarousel({ slidesData }: HeroCarouselProps) {
         </svg>
       </button>
       <button
-        onClick={nextSlide}
+        onClick={() => goToSlide((current + 1) % activeSlides.length)}
         className="hidden md:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center border border-[#C9A84C]/25 text-[#F8F3E8]/60 hover:text-[#C9A84C] hover:border-[#C9A84C]/60 transition-all duration-300 rounded-full backdrop-blur-sm bg-[#0D0D0D]/30"
         aria-label="Next slide"
       >
@@ -248,3 +263,4 @@ export default function HeroCarousel({ slidesData }: HeroCarouselProps) {
     </section>
   );
 }
+

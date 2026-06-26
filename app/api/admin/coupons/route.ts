@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb, isMock } from "@/lib/firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
+import { invalidateCouponCache } from "@/lib/coupon-cache";
 
 async function verifyAdmin(req: NextRequest) {
   const token = req.cookies.get("rd_admin")?.value;
@@ -86,6 +87,9 @@ export async function POST(req: NextRequest) {
 
     await docRef.set(couponData, { merge: true });
 
+    // Invalidate cached details for this coupon code
+    invalidateCouponCache(couponCode);
+
     return NextResponse.json({ success: true, code: couponCode });
   } catch (error: any) {
     console.error("Coupon POST error:", error);
@@ -118,6 +122,9 @@ export async function DELETE(req: NextRequest) {
     }
 
     await adminDb.collection("coupons").doc(code.toUpperCase()).delete();
+
+    // Invalidate cached details for this coupon code
+    invalidateCouponCache(code);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

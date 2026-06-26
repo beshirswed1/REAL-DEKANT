@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleWishlist } from "@/store/slices/wishlistSlice";
@@ -22,12 +22,18 @@ export default function ProductCard({ product }: ProductCardProps) {
   const dispatch = useDispatch();
   const [selectedSize, setSelectedSize] = useState<PriceSize>("5ml");
   const [isAdding, setIsAdding] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
+
+  const displayImage = getOptimizedImage(product.images?.[0], "card");
+
+  const hasImage = !imageError && !!displayImage;
 
   const isWishlisted = useSelector((state: RootState) =>
     state.wishlist.items.some((i) => i.productId === product.id)
   );
-
-  const displayImage = getOptimizedImage(product.images?.[0], "card");
 
   // Find lowest price for wishlist
   const lowestPrice = Math.min(
@@ -100,7 +106,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 p-1.5 sm:p-2 bg-white/80 backdrop-blur-md hover:bg-white rounded-full text-charcoal hover:text-[#C9A84C] hover:scale-110 active:scale-95 transition-all duration-300 shadow-sm"
           aria-label={isWishlisted ? "Favorilerden Çıkar" : "Favorilere Ekle"}
         >
-          {isWishlisted ? (
+          {mounted && isWishlisted ? (
             <FaHeart className="text-[#C9A84C] w-3 h-3 sm:w-3.5 sm:h-3.5" />
           ) : (
             <FiHeart className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
@@ -124,16 +130,30 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Image Link */}
         <Link
           href={`/shop/${product.slug}`}
-          className="absolute inset-0 block cursor-pointer"
+          className="absolute inset-0 flex items-center justify-center cursor-pointer"
         >
-          <Image
-            src={displayImage}
-            alt={`${product.brand} - ${product.perfumeName}`}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            quality={95}
-            className="object-cover object-center"
-          />
+          {hasImage ? (
+            <Image
+              src={displayImage}
+              alt={`${product.brand} - ${product.perfumeName}`}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              quality={95}
+              className="object-cover object-center"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-[#F4F4F2]">
+              <div className="relative w-3/5 h-3/5 opacity-30">
+                <Image
+                  src="/logo.png"
+                  alt="Dekant Logo"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+            </div>
+          )}
         </Link>
       </div>
 

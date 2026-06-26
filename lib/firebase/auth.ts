@@ -6,6 +6,8 @@ import {
   updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   sendPasswordResetEmail,
   type User,
   type NextOrObserver,
@@ -22,10 +24,36 @@ export const signInWithEmail = (email: string, password: string) =>
 
 // ─── Google OAuth ─────────────────────────────────────────────────────────────
 const googleProvider = new GoogleAuthProvider();
-export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
+
+export const signInWithGoogle = async () => {
+  try {
+    // Try popup first (better UX — stays on same page)
+    return await signInWithPopup(auth, googleProvider);
+  } catch (error: unknown) {
+    const firebaseError = error as { code?: string };
+    // If popup was blocked or closed, fall back to redirect
+    if (
+      firebaseError.code === "auth/popup-blocked" ||
+      firebaseError.code === "auth/popup-closed-by-user" ||
+      firebaseError.code === "auth/cancelled-popup-request"
+    ) {
+      // signInWithRedirect navigates the current tab — no popup needed
+      return signInWithRedirect(auth, googleProvider);
+    }
+    throw error;
+  }
+};
+
+// ─── Handle redirect result (call on app init) ──────────────────────────────
+export const handleGoogleRedirectResult = () => getRedirectResult(auth);
 
 // ─── Sign out ────────────────────────────────────────────────────────────────
-export const signOut = () => firebaseSignOut(auth);
+export const signOut = () => {
+  if (typeof window !== "undefined") {
+    document.cookie = "rd_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+  }
+  return firebaseSignOut(auth);
+};
 
 // ─── Update display name / photo ─────────────────────────────────────────────
 export const updateUserProfile = (

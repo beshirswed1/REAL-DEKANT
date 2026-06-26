@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb, isMock } from "@/lib/firebase-admin";
+import { adminAuth, adminDb } from "@/lib/firebase-admin";
 
 async function verifyAdmin(req: NextRequest) {
   const token = req.cookies.get("rd_admin")?.value;
@@ -13,7 +13,7 @@ async function verifyAdmin(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-  const isAdmin = isMock || (await verifyAdmin(req));
+  const isAdmin = await verifyAdmin(req);
   if (!isAdmin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -40,7 +40,7 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const isAdmin = isMock || (await verifyAdmin(req));
+  const isAdmin = await verifyAdmin(req);
   if (!isAdmin) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

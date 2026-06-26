@@ -114,13 +114,11 @@ function StatCard({ label, value, icon, color }: { label: string; value: number;
       display: "flex",
       alignItems: "center",
       gap: 12,
-      padding: "14px 18px",
+      padding: "12px 14px",
       background: "#fff",
       border: "1px solid #f0ebe0",
       borderRadius: 14,
-      flex: "1 1 0",
-      minWidth: 130,
-    }}>
+    }} className="w-full">
       <div style={{
         width: 38,
         height: 38,
@@ -427,7 +425,7 @@ export default function ProductListClient({ products: initialProducts }: Product
       </div>
 
       {/* ─── Stats Row ──────────────────────────────────────────────────── */}
-      <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
         <StatCard label="Toplam Ürün" value={stats.total} icon="📦" color="rgba(212,175,55,0.1)" />
         <StatCard label="Yayında" value={stats.published} icon="✅" color="rgba(34,197,94,0.1)" />
         <StatCard label="Taslak" value={stats.draft} icon="📝" color="rgba(234,179,8,0.1)" />
@@ -435,15 +433,9 @@ export default function ProductListClient({ products: initialProducts }: Product
       </div>
 
       {/* ─── Search + Sort Bar ───────────────────────────────────────────── */}
-      <div style={{
-        display: "flex",
-        gap: 12,
-        marginBottom: 12,
-        alignItems: "stretch",
-        flexWrap: "wrap",
-      }}>
+      <div className="flex flex-col sm:flex-row gap-3 mb-3 items-stretch">
         {/* Search */}
-        <div style={{ position: "relative", flex: "1 1 300px", minWidth: 200 }}>
+        <div style={{ position: "relative" }} className="w-full sm:flex-1">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{
             position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)",
             width: 16, height: 16, color: "#aaa", pointerEvents: "none",
@@ -505,7 +497,7 @@ export default function ProductListClient({ products: initialProducts }: Product
         </div>
 
         {/* Sort Dropdown */}
-        <div style={{ position: "relative", minWidth: 220 }}>
+        <div style={{ position: "relative" }} className="w-full sm:w-[220px]">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{
             position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)",
             width: 15, height: 15, color: "#aaa", pointerEvents: "none",
@@ -569,6 +561,7 @@ export default function ProductListClient({ products: initialProducts }: Product
             whiteSpace: "nowrap",
             position: "relative",
           }}
+          className="w-full sm:w-auto justify-center"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 15, height: 15 }}>
             <line x1="4" y1="21" x2="4" y2="14" />
@@ -771,8 +764,8 @@ export default function ProductListClient({ products: initialProducts }: Product
               <thead>
                 <tr style={{ background: "#faf8f2", borderBottom: "1px solid #f0ebe0" }}>
                   <th style={thStyle}>Ürün</th>
-                  <th style={{ ...thStyle, width: 80 }}>SKU</th>
-                  <th style={{ ...thStyle, width: 160 }}>Fiyatlar</th>
+                  <th className="hidden md:table-cell" style={{ ...thStyle, width: 80 }}>SKU</th>
+                  <th className="hidden md:table-cell" style={{ ...thStyle, width: 160 }}>Fiyatlar</th>
                   <th style={{ ...thStyle, width: 70 }}>Stok</th>
                   <th style={{ ...thStyle, width: 90 }}>Durum</th>
                   <th style={{ ...thStyle, width: 90, textAlign: "right" }}>İşlemler</th>
@@ -820,10 +813,17 @@ export default function ProductListClient({ products: initialProducts }: Product
                             <span style={{ color: "#666", fontWeight: 500, fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", maxWidth: 220 }}>
                               {product.perfumeName}
                             </span>
+                            {/* Mobile-only info (SKU and Prices) */}
+                            <div className="flex flex-col gap-1 mt-1 md:hidden text-[11px] text-gray-500 font-sans font-normal">
+                              <span>SKU: {product.sku}</span>
+                              <span className="font-semibold text-[#B8960C]">
+                                3ml: {fmtPrice(prices["3ml"])} | 5ml: {fmtPrice(prices["5ml"])} | 10ml: {fmtPrice(prices["10ml"])}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </td>
-                      <td style={tdStyle}>
+                      <td className="hidden md:table-cell" style={tdStyle}>
                         <span style={{
                           fontSize: 11, fontWeight: 600, color: "#999", fontFamily: "monospace",
                           background: "#f5f3ed", padding: "3px 7px", borderRadius: 6,
@@ -831,7 +831,7 @@ export default function ProductListClient({ products: initialProducts }: Product
                           {product.sku}
                         </span>
                       </td>
-                      <td style={tdStyle}>
+                      <td className="hidden md:table-cell" style={tdStyle}>
                         <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 500 }}>
                           <span style={priceChipStyle}>3ml: <b style={{ color: "#1a1a1a" }}>{fmtPrice(prices["3ml"])}</b></span>
                           <span style={priceChipStyle}>5ml: <b style={{ color: "#1a1a1a" }}>{fmtPrice(prices["5ml"])}</b></span>

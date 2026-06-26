@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb, isMock } from "@/lib/firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
+import { invalidateSettingsCache } from "@/lib/settings-cache";
 
 async function verifyAdmin(req: NextRequest) {
   const token = req.cookies.get("rd_admin")?.value;
@@ -244,6 +245,9 @@ export async function PUT(req: NextRequest) {
     }
 
     await docRef.set(updateData, { merge: true });
+
+    // Invalidate the settings cache so next visitor loads updated configuration
+    invalidateSettingsCache();
 
     return NextResponse.json({ success: true, section: section || "all" });
   } catch (error: any) {

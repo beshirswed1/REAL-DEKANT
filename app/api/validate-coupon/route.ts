@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
+import { getCachedCoupon } from "@/lib/coupon-cache";
 import type { CartItem } from "@/types";
+import { rateLimit, getClientIp } from "@/lib/rate-limiter";
 
 export async function POST(req: NextRequest) {
+  // ─── Rate Limiting: max 10 coupon checks per minute per IP ────────────────
+  const clientIp = getClientIp(req.headers);
+  const { limited } = rateLimit(`coupon:${clientIp}`, 10, 60_000);
+  if (limited) {
+    return NextResponse.json(
+      { valid: false, message: "Çok fazla istek. Lütfen bir dakika bekleyin." },
+      { status: 429 }
+    );
+  }
+
   try {
     const { code, cartItems, locale } = await req.json();
 
@@ -13,18 +24,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Read coupon from Firestore /coupons/{code}
-    const docRef = adminDb.collection("coupons").doc(code.trim().toUpperCase());
-    const docSnap = await docRef.get();
+    // Read coupon from in-memory cache (thread-safe, stampede-protected)
+    const { exists, data } = await getCachedCoupon(code);
 
-    if (!docSnap.exists) {
+    if (!exists || !data) {
       return NextResponse.json({
         valid: false,
         message: getErrorMessage("not_found", locale),
       });
     }
-
-    const data = docSnap.data()!;
 
     // 1. Validate isActive
     if (data.isActive === false) {
@@ -36,9 +44,10 @@ export async function POST(req: NextRequest) {
 
     // 2. Validate expiration (expiresAt > now)
     if (data.expiresAt) {
-      const expiresAtDate = typeof data.expiresAt.toDate === "function"
-        ? data.expiresAt.toDate()
-        : new Date(data.expiresAt);
+      const expiresAt = data.expiresAt;
+      const expiresAtDate = (expiresAt && typeof expiresAt === "object" && "toDate" in expiresAt)
+        ? (expiresAt as { toDate: () => Date }).toDate()
+        : new Date(expiresAt as string | Date);
       if (expiresAtDate.getTime() < Date.now()) {
         return NextResponse.json({
           valid: false,

@@ -21,7 +21,9 @@ export default function middleware(req: NextRequest) {
 
   if (isAccountRoute) {
     const hasAuth = req.cookies.has("rd_auth");
+    console.log(`[Middleware] Path: ${pathname}, hasAuth cookie: ${hasAuth}, cookies:`, Array.from(req.cookies.getAll()).map(c => `${c.name}=${c.value}`));
     if (!hasAuth) {
+      console.log(`[Middleware] Redirecting unauthenticated user from ${pathname} to /?login=true`);
       const url = req.nextUrl.clone();
       url.pathname = "/";
       url.searchParams.set("login", "true");

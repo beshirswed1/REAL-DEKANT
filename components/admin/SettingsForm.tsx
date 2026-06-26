@@ -594,6 +594,7 @@ export default function SettingsForm({ initialConfig }: SettingsFormProps) {
   // ─── Contact State ───────────────
   const [contactPhone, setContactPhone] = useState(initialConfig.contactPhone || "");
   const [contactWhatsapp, setContactWhatsapp] = useState(initialConfig.contactWhatsapp || "");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [contactEmail, setContactEmail] = useState(initialConfig.contactEmail || "");
   const [contactAddress, setContactAddress] = useState(initialConfig.contactAddress || "");
   const [contactWorkingHours, setContactWorkingHours] = useState(initialConfig.contactWorkingHours || "");
@@ -1252,46 +1253,57 @@ export default function SettingsForm({ initialConfig }: SettingsFormProps) {
         </p>
       </div>
 
-      {/* ─── Tab Navigation ─────────────────────────────────────────────── */}
-      <div className="mb-6 -mx-1">
-        <div className="flex gap-1.5 overflow-x-auto pb-1 px-1 scrollbar-hide">
-          {TABS.map((tab) => {
-            const isActive = activeTab === tab.key;
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
-                  isActive
-                    ? "bg-[#111] text-white shadow-md shadow-gray-900/20"
-                    : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:text-gray-900"
-                }`}
-              >
-                <span className={`transition-colors ${isActive ? "text-[#D4AF37]" : "text-gray-400"}`}>
-                  {tab.icon}
-                </span>
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ─── Active Tab Content Card ────────────────────────────────────── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        {/* Tab Header */}
-        <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
-          <h2 className="text-lg font-bold text-gray-900">
-            {TABS.find((t) => t.key === activeTab)?.label}
-          </h2>
-          <p className="text-xs text-gray-500 mt-0.5">
-            {TABS.find((t) => t.key === activeTab)?.description}
-          </p>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* ─── Tab Navigation ─────────────────────────────────────────────── */}
+        <div className="md:col-span-1">
+          {/* Horizontal scroll on mobile, vertical stack on desktop */}
+          <div className="flex md:flex-col gap-2 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+            {TABS.map((tab) => {
+              const isActive = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-250 flex-shrink-0 md:w-full text-left ${
+                    isActive
+                      ? "bg-[#111] text-white shadow-md shadow-gray-900/10 md:translate-x-1"
+                      : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
+                >
+                  <span className={`transition-colors ${isActive ? "text-[#D4AF37]" : "text-gray-400"}`}>
+                    {tab.icon}
+                  </span>
+                  {/* Desktop text showing label + brief description */}
+                  <div className="hidden md:block min-w-0">
+                    <div className="font-bold text-xs leading-none">{tab.label}</div>
+                    <div className={`text-[10px] font-normal mt-1 leading-tight truncate ${isActive ? "text-gray-300" : "text-gray-400"}`}>
+                      {tab.description}
+                    </div>
+                  </div>
+                  {/* Mobile text showing label only */}
+                  <span className="md:hidden">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Tab Body */}
-        {renderTabContent()}
+        {/* ─── Active Tab Content Card ────────────────────────────────────── */}
+        <div className="md:col-span-3 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden h-fit">
+          {/* Tab Header */}
+          <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
+            <h2 className="text-lg font-bold text-gray-900">
+              {TABS.find((t) => t.key === activeTab)?.label}
+            </h2>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {TABS.find((t) => t.key === activeTab)?.description}
+            </p>
+          </div>
+
+          {/* Tab Body */}
+          {renderTabContent()}
+        </div>
       </div>
 
       {/* ─── Toast ──────────────────────────────────────────────────────── */}

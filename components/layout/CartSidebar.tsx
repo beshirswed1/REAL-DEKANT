@@ -4,8 +4,9 @@ import React, { useState, useEffect } from "react";
 
 import Link from "next/link";
 import { useSelector, useDispatch } from "react-redux";
-import { selectIsCartOpen, closeCart } from "@/store/slices/uiSlice";
+import { selectIsCartOpen, closeCart, openLoginModal } from "@/store/slices/uiSlice";
 import { useCart } from "@/hooks/useCart";
+import { useAuth } from "@/hooks/useAuth";
 import { FiX, FiMinus, FiPlus, FiTrash2, FiTag, FiShoppingBag, FiLock } from "react-icons/fi";
 import Image from "next/image";
 import { getOptimizedImage } from "@/lib/imgbb/config";
@@ -14,7 +15,7 @@ export default function CartSidebar() {
   const locale = "tr";
   const isOpen = useSelector(selectIsCartOpen);
   const dispatch = useDispatch();
-
+  const { isAuthenticated } = useAuth();
   const {
     items,
     itemCount,
@@ -137,9 +138,9 @@ export default function CartSidebar() {
         }`}
       >
         {/* Header */}
-        <div className="px-6 py-5 border-b border-[#C9A84C]/20 flex items-center justify-between bg-white/50 backdrop-blur-md">
+        <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-[#C9A84C]/20 flex items-center justify-between bg-white/50 backdrop-blur-md">
           <div className="flex items-center gap-3">
-            <span className="font-playfair text-[22px] font-bold tracking-widest text-charcoal uppercase">
+            <span className="font-playfair text-lg sm:text-[22px] font-bold tracking-widest text-charcoal uppercase">
               SEPETİM
             </span>
             {itemCount > 0 && (
@@ -158,7 +159,7 @@ export default function CartSidebar() {
         </div>
 
         {/* Content Area */}
-        <div className="flex-grow overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-[#C9A84C]/30">
+        <div className="flex-grow overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6 scrollbar-thin scrollbar-thumb-[#C9A84C]/30">
           {items.length === 0 ? (
             /* Empty State */
             <div className="h-full flex flex-col items-center justify-center text-center px-4 py-20">
@@ -186,10 +187,10 @@ export default function CartSidebar() {
               {items.map((item) => (
                 <div
                   key={item.id}
-                  className="group relative bg-white/60 backdrop-blur-md border border-[#C9A84C]/20 p-4 flex space-x-5 rtl:space-x-reverse transition-all duration-500 hover:border-[#C9A84C]/60 hover:shadow-[0_8px_30px_rgba(201,168,76,0.15)] hover:bg-white"
+                  className="group relative bg-white/60 backdrop-blur-md border border-[#C9A84C]/20 p-3 sm:p-4 flex space-x-3 sm:space-x-5 rtl:space-x-reverse transition-all duration-500 hover:border-[#C9A84C]/60 hover:shadow-[0_8px_30px_rgba(201,168,76,0.15)] hover:bg-white"
                 >
                   {/* Item Image */}
-                  <div className="relative w-24 h-24 bg-cream-dark/10 flex-shrink-0 border border-[#C9A84C]/15 overflow-hidden rounded-sm shadow-inner group-hover:shadow-[0_0_15px_rgba(201,168,76,0.2)] transition-shadow duration-500">
+                  <div className="relative w-16 h-16 sm:w-24 sm:h-24 bg-cream-dark/10 flex-shrink-0 border border-[#C9A84C]/15 overflow-hidden rounded-sm shadow-inner group-hover:shadow-[0_0_15px_rgba(201,168,76,0.2)] transition-shadow duration-500">
                     <Image
                       src={getOptimizedImage(item.image, "thumb")}
                       alt={item.perfumeName}
@@ -207,57 +208,57 @@ export default function CartSidebar() {
                           <span className="font-montserrat text-[9px] tracking-[0.2em] text-[#C9A84C] uppercase font-bold mb-1 block">
                             {item.brand}
                           </span>
-                          <h4 className="font-playfair text-[15px] font-bold text-charcoal leading-tight group-hover:text-[#8B6914] transition-colors duration-300">
+                          <h4 className="font-playfair text-[13px] sm:text-[15px] font-bold text-charcoal leading-tight group-hover:text-[#8B6914] transition-colors duration-300">
                             {item.perfumeName}
                           </h4>
                         </div>
                         <button
                           onClick={() => removeItem(item.id)}
-                          className="text-charcoal/40 hover:text-red-500 transition-all p-2 rounded-full hover:bg-red-50"
+                          className="text-charcoal/40 hover:text-red-500 transition-all p-1.5 rounded-full hover:bg-red-50"
                           aria-label="Remove item"
                         >
-                          <FiTrash2 size={18} />
+                          <FiTrash2 size={16} />
                         </button>
                       </div>
 
                       {/* Size Badge */}
-                      <div className="mt-2 flex items-center space-x-2 rtl:space-x-reverse">
-                        <span className="bg-charcoal text-white font-montserrat text-[9px] tracking-widest uppercase font-semibold px-2.5 py-1 rounded-xs">
+                      <div className="mt-1 flex items-center space-x-2 rtl:space-x-reverse">
+                        <span className="bg-charcoal text-white font-montserrat text-[8px] sm:text-[9px] tracking-widest uppercase font-semibold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xs">
                           {item.size}
                         </span>
                       </div>
                     </div>
 
                     {/* Price and Stepper */}
-                    <div className="flex justify-between items-end mt-3">
+                    <div className="flex justify-between items-end mt-2">
                       {/* Qty Stepper */}
-                      <div className="flex items-center border border-[#C9A84C]/40 bg-white rounded-full shadow-sm overflow-hidden h-9">
+                      <div className="flex items-center border border-[#C9A84C]/40 bg-white rounded-full shadow-sm overflow-hidden h-8 sm:h-9">
                         <button
                           onClick={() => updateItemQty(item.id, item.qty - 1)}
-                          className="px-3.5 h-full flex items-center justify-center text-charcoal/70 hover:text-charcoal hover:bg-[#C9A84C]/15 transition-colors focus:outline-none"
+                          className="px-2.5 sm:px-3.5 h-full flex items-center justify-center text-charcoal/70 hover:text-charcoal hover:bg-[#C9A84C]/15 transition-colors focus:outline-none"
                           aria-label="Decrease quantity"
                         >
-                          <FiMinus size={16} />
+                          <FiMinus size={14} />
                         </button>
-                        <span className="w-8 text-center font-montserrat text-sm font-semibold text-charcoal">
+                        <span className="w-6 sm:w-8 text-center font-montserrat text-xs sm:text-sm font-semibold text-charcoal">
                           {item.qty}
                         </span>
                         <button
                           onClick={() => updateItemQty(item.id, item.qty + 1)}
-                          className="px-3.5 h-full flex items-center justify-center text-charcoal/70 hover:text-charcoal hover:bg-[#C9A84C]/15 transition-colors focus:outline-none"
+                          className="px-2.5 sm:px-3.5 h-full flex items-center justify-center text-charcoal/70 hover:text-charcoal hover:bg-[#C9A84C]/15 transition-colors focus:outline-none"
                           aria-label="Increase quantity"
                         >
-                          <FiPlus size={16} />
+                          <FiPlus size={14} />
                         </button>
                       </div>
 
                       {/* Total Price */}
                       <div className="text-right flex flex-col items-end">
-                        <span className="font-montserrat text-base font-bold text-charcoal leading-none tracking-wide">
+                        <span className="font-montserrat text-sm sm:text-base font-bold text-charcoal leading-none tracking-wide">
                           ₺{(item.price * item.qty).toLocaleString("tr-TR")}
                         </span>
                         {item.qty > 1 && (
-                           <span className="font-montserrat text-[10px] text-charcoal/40 mt-1">
+                           <span className="font-montserrat text-[9px] sm:text-[10px] text-charcoal/40 mt-1">
                              ₺{item.price.toLocaleString("tr-TR")} / adet
                            </span>
                         )}
@@ -272,7 +273,7 @@ export default function CartSidebar() {
 
         {/* Footer / Summary (only shown if there are items) */}
         {items.length > 0 && (
-          <div className="border-t border-[#C9A84C]/20 p-6 bg-cream-light/60 backdrop-blur-sm space-y-4">
+          <div className="border-t border-[#C9A84C]/20 p-4 sm:p-6 bg-cream-light/60 backdrop-blur-sm space-y-4" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
             {/* Coupon Form */}
             {!coupon ? (
               <form onSubmit={handleApplyCoupon} className="flex group shadow-sm rounded-lg overflow-hidden">
@@ -365,7 +366,15 @@ export default function CartSidebar() {
             {/* Checkout CTA */}
             <Link
               href="/checkout"
-              onClick={handleClose}
+              onClick={(e) => {
+                if (!isAuthenticated) {
+                  e.preventDefault();
+                  handleClose();
+                  dispatch(openLoginModal());
+                } else {
+                  handleClose();
+                }
+              }}
               className="group relative w-full flex items-center justify-center gap-3 bg-charcoal text-white font-montserrat text-sm font-bold py-4 px-6 tracking-[0.2em] uppercase overflow-hidden transition-all duration-500 shadow-lg hover:shadow-[0_8px_30px_rgba(201,168,76,0.4)] mt-4 rounded-lg"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-[#C9A84C] to-[#8B6914] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
