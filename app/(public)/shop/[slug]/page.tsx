@@ -266,8 +266,8 @@ export async function generateMetadata({
   const product = await fetchProduct(slug);
   if (!product) return {};
 
-  const title = `${product.brand} ${product.perfumeName} | Real Dekant`;
-  const description = `${product.brand} - ${product.perfumeName} orijinal marka niş parfüm dekantı (deneme boyu). 3ml, 5ml ve 10ml boyut seçenekleri ile.`;
+  const title = `${product.brand} ${product.perfumeName} | realdekant`;
+  const description = `${product.brand} ${product.perfumeName} %100 orijinal marka parfüm dekantı (deneme boyu). 3ml, 5ml ve 10ml boyut seçenekleri, ücretsiz kargo fırsatı ve steril koşullarda özenle hazırlanmış paketlerle.`;
 
   const firstImg = product.images?.[0];
   const firstImgUrl = firstImg ? (typeof firstImg === "string" ? firstImg : firstImg.url) : "";
@@ -276,7 +276,24 @@ export async function generateMetadata({
   return {
     title,
     description,
+    keywords: [
+      product.brand,
+      product.perfumeName,
+      `${product.brand} ${product.perfumeName}`,
+      "dekant",
+      "parfüm",
+      "decant",
+      "orijinal parfüm",
+      "deneme boyu",
+      `${product.brand} dekant`,
+      `${product.perfumeName} dekant`,
+      "steril paketleme"
+    ],
     openGraph: {
+      type: "website",
+      locale: "tr_TR",
+      url: `https://realdekant.com/shop/${slug}`,
+      siteName: "realdekant",
       title,
       description,
       images: [
@@ -284,9 +301,18 @@ export async function generateMetadata({
           url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: product.perfumeName,
+          alt: `${product.brand} ${product.perfumeName}`,
         },
       ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImageUrl],
+    },
+    alternates: {
+      canonical: `/shop/${slug}`,
     },
   };
 }

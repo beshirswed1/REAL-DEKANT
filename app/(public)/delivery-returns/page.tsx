@@ -1,24 +1,32 @@
-"use client";
-
-import React, { useState, useEffect } from "react";
+import React from "react";
+import type { Metadata } from "next";
 import { FiTruck, FiShield, FiCornerUpLeft, FiAlertTriangle } from "react-icons/fi";
+import { getSettingsConfig } from "@/lib/settings-cache";
 
-export default function DeliveryReturnsPage() {
-  const [email, setEmail] = useState("info@realdekant.com");
-  const [shippingFee, setShippingFee] = useState(60);
-  const [freeShippingThreshold, setFreeShippingThreshold] = useState(1000);
+export const metadata: Metadata = {
+  title: "Teslimat ve İade Politikası | realdekant",
+  description: "Real Dekant kargo teslimat koşulları, ücretsiz kargo limitleri, iade ve cayma hakkı kuralları.",
+  alternates: {
+    canonical: "/delivery-returns",
+  },
+};
+
+export default async function DeliveryReturnsPage() {
+  let email = "info@realdekant.com";
+  let shippingFee = 60;
+  let freeShippingThreshold = 1000;
   const currentYear = new Date().getFullYear();
 
-  useEffect(() => {
-    fetch("/api/settings")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.contactEmail) setEmail(data.contactEmail);
-        if (data.shippingFee) setShippingFee(data.shippingFee);
-        if (data.freeShippingThreshold) setFreeShippingThreshold(data.freeShippingThreshold);
-      })
-      .catch((err) => console.error("Error fetching settings:", err));
-  }, []);
+  try {
+    const settings = await getSettingsConfig();
+    if (settings) {
+      if (settings.contactEmail) email = settings.contactEmail;
+      if (typeof settings.shippingFee === "number") shippingFee = settings.shippingFee;
+      if (typeof settings.freeShippingThreshold === "number") freeShippingThreshold = settings.freeShippingThreshold;
+    }
+  } catch (err) {
+    console.error("Error fetching settings server-side in delivery-returns page:", err);
+  }
 
   return (
     <div className="flex flex-col bg-cream-light text-charcoal min-h-screen overflow-x-hidden">

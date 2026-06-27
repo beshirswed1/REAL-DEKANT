@@ -1,7 +1,6 @@
-"use client";
-
 import React from "react";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { 
   FiWind, 
   FiHeart, 
@@ -13,6 +12,14 @@ import {
   FiDroplet,
   FiCheckCircle
 } from "react-icons/fi";
+
+export const metadata: Metadata = {
+  title: "Hakkımızda | realdekant",
+  description: "Real Dekant — %100 orijinal designer ve niş parfümlerden steril koşullarda özenle hazırlanan lüks dekant (deneme boyu) koleksiyonu hikayesi.",
+  alternates: {
+    canonical: "/about",
+  },
+};
 
 export default function AboutPage() {
   return (

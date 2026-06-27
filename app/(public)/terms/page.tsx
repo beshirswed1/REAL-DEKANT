@@ -1,27 +1,29 @@
-"use client";
+import React from "react";
+import type { Metadata } from "next";
+import { getSettingsConfig } from "@/lib/settings-cache";
 
-import React, { useState, useEffect } from "react";
+export const metadata: Metadata = {
+  title: "Kullanım Şartları | realdekant",
+  description: "Real Dekant web sitesi kullanım şartları, alışveriş kuralları, teslimat ve iade istisnaları koşulları.",
+  alternates: {
+    canonical: "/terms",
+  },
+};
 
-export default function TermsOfUsePage() {
-  const [termsOfUse, setTermsOfUse] = useState<string | null>(null);
-  const [email, setEmail] = useState("info@realdekant.com");
-  const [loading, setLoading] = useState(true);
+export default async function TermsOfUsePage() {
+  let termsOfUse: string | null = null;
+  let email = "info@realdekant.com";
   const currentYear = new Date().getFullYear();
 
-  useEffect(() => {
-    fetch("/api/settings")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.termsOfUse) {
-          setTermsOfUse(data.termsOfUse);
-        }
-        if (data.contactEmail) {
-          setEmail(data.contactEmail);
-        }
-      })
-      .catch((err) => console.error("Error fetching settings:", err))
-      .finally(() => setLoading(false));
-  }, []);
+  try {
+    const settings = await getSettingsConfig();
+    if (settings) {
+      if (settings.termsOfUse) termsOfUse = settings.termsOfUse;
+      if (settings.contactEmail) email = settings.contactEmail;
+    }
+  } catch (err) {
+    console.error("Error fetching settings server-side in terms page:", err);
+  }
 
   return (
     <div className="flex flex-col bg-cream-light text-charcoal min-h-screen overflow-x-hidden">
@@ -42,14 +44,7 @@ export default function TermsOfUsePage() {
       {/* Content Section */}
       <section className="py-12 sm:py-16 md:py-20 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="bg-white border border-[#C9A84C]/15 rounded-2xl shadow-sm p-6 sm:p-10 md:p-12 font-montserrat text-sm text-charcoal/80 leading-relaxed space-y-6">
-          {loading ? (
-            <div className="space-y-4 animate-pulse">
-              <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-              <div className="h-4 bg-gray-200 rounded w-full"></div>
-              <div className="h-4 bg-gray-200 rounded w-full"></div>
-              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-            </div>
-          ) : termsOfUse ? (
+          {termsOfUse ? (
             <div 
               className="prose prose-sm max-w-none whitespace-pre-wrap prose-headings:font-playfair prose-headings:text-charcoal prose-p:text-charcoal/80 prose-li:text-charcoal/80"
               dangerouslySetInnerHTML={{ __html: termsOfUse }}
@@ -73,7 +68,7 @@ export default function TermsOfUsePage() {
                 Sitemizde Havale/EFT ve Kapıda Ödeme (Nakit) seçenekleri sunulmaktadır. Siparişlerinizi oluştururken verdiğiniz iletişim ve adres bilgilerinin doğruluğundan kullanıcı sorumludur. Yanlış bilgi verilmesi nedeniyle teslim edilemeyen siparişlerin sorumluluğu müşteriye aittir. Kapıda nakit ödeme seçeneğinde, kargo firması tarafından tahsil edilen ek bir hizmet bedeli uygulanabilir.
               </p>
 
-              <h3 className="font-playfair text-base font-bold text-charcoal mt-6">3. Kargo ve Teslimat</h3>
+              <h3 className="font-playfair text-base font-bold text-[#1A1A1A] mt-6">3. Kargo ve Teslimat</h3>
               <p>
                 Onaylanan siparişleriniz 1-3 iş günü içerisinde kargo firmasına teslim edilir. Pazar günleri ve resmi tatillerde gönderim yapılmamaktadır. Kargo teslimat süresi, kargo firmasının yoğunluğuna ve teslimat adresinizin konumuna göre değişmektedir. Tüm ürünlerimiz özel koruyucu patpatlı ambalajlarda sızdırmazlık bandı çekilmiş olarak gönderilir.
               </p>

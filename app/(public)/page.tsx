@@ -1,6 +1,15 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Ana Sayfa | realdekant | Orijinal Parfüm Dekant Koleksiyonu",
+  description: "Creed, Tom Ford, Dior ve Chanel gibi seçkin niş parfümlerden steril koşullarda özenle hazırlanan %100 orijinal lüks dekant (deneme boyu) koleksiyonu.",
+  alternates: {
+    canonical: "/",
+  },
+};
 
 // Enable ISR caching (1 hour)
 export const revalidate = 3600;

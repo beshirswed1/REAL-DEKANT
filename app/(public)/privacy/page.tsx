@@ -1,27 +1,29 @@
-"use client";
+import React from "react";
+import type { Metadata } from "next";
+import { getSettingsConfig } from "@/lib/settings-cache";
 
-import React, { useState, useEffect } from "react";
+export const metadata: Metadata = {
+  title: "Gizlilik Politikası | realdekant",
+  description: "Real Dekant gizlilik ve kişisel verilerin korunması politikası (KVKK bilgilendirmesi).",
+  alternates: {
+    canonical: "/privacy",
+  },
+};
 
-export default function PrivacyPage() {
-  const [privacyPolicy, setPrivacyPolicy] = useState<string | null>(null);
-  const [email, setEmail] = useState("info@realdekant.com");
-  const [loading, setLoading] = useState(true);
+export default async function PrivacyPage() {
+  let privacyPolicy: string | null = null;
+  let email = "info@realdekant.com";
   const currentYear = new Date().getFullYear();
 
-  useEffect(() => {
-    fetch("/api/settings")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.privacyPolicy) {
-          setPrivacyPolicy(data.privacyPolicy);
-        }
-        if (data.contactEmail) {
-          setEmail(data.contactEmail);
-        }
-      })
-      .catch((err) => console.error("Error fetching settings:", err))
-      .finally(() => setLoading(false));
-  }, []);
+  try {
+    const settings = await getSettingsConfig();
+    if (settings) {
+      if (settings.privacyPolicy) privacyPolicy = settings.privacyPolicy;
+      if (settings.contactEmail) email = settings.contactEmail;
+    }
+  } catch (err) {
+    console.error("Error fetching settings server-side in privacy page:", err);
+  }
 
   return (
     <div className="flex flex-col bg-cream-light text-charcoal min-h-screen overflow-x-hidden">
@@ -42,17 +44,7 @@ export default function PrivacyPage() {
       {/* Content Section */}
       <section className="py-12 sm:py-16 md:py-20 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="bg-white border border-[#C9A84C]/15 rounded-2xl shadow-sm p-6 sm:p-10 md:p-12 font-montserrat text-sm text-charcoal/80 leading-relaxed space-y-6">
-          {loading ? (
-            <div className="space-y-4 animate-pulse">
-              <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-              <div className="h-4 bg-gray-200 rounded w-full"></div>
-              <div className="h-4 bg-gray-200 rounded w-full"></div>
-              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-              <div className="h-6 bg-gray-200 rounded w-1/4 mt-8"></div>
-              <div className="h-4 bg-gray-200 rounded w-full"></div>
-              <div className="h-4 bg-gray-200 rounded w-full"></div>
-            </div>
-          ) : privacyPolicy ? (
+          {privacyPolicy ? (
             <div 
               className="prose prose-sm max-w-none whitespace-pre-wrap prose-headings:font-playfair prose-headings:text-charcoal prose-p:text-charcoal/80 prose-li:text-charcoal/80"
               dangerouslySetInnerHTML={{ __html: privacyPolicy }}
@@ -83,7 +75,7 @@ export default function PrivacyPage() {
               </p>
               <ul className="list-disc pl-5 space-y-2">
                 <li>Siparişlerinizin doğru şekilde hazırlanması, paketlenmesi ve adresinize teslim edilmesi.</li>
-                <li>Havale/EFT and kapıda ödeme süreçlerinin doğrulanması ve muhasebeleştirilmesi.</li>
+                <li>Havale/EFT ve kapıda ödeme süreçlerinin doğrulanması ve muhasebeleştirilmesi.</li>
                 <li>Müşteri hizmetleri kapsamında sorularınızın yanıtlanması ve destek taleplerinizin çözümlenmesi.</li>
                 <li>Yasal mevzuatlardan doğan bilgi saklama ve vergilendirme yükümlülüklerinin yerine getirilmesi.</li>
               </ul>

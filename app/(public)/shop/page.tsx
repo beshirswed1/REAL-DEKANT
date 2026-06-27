@@ -1,8 +1,17 @@
 import React from "react";
+import type { Metadata } from "next";
 import { getPublishedProducts } from "@/lib/product-cache";
 import type { Product } from "@/types";
 import { Timestamp } from "firebase/firestore";
 import ProductGrid from "@/components/product/ProductGrid";
+
+export const metadata: Metadata = {
+  title: "Katalog | Tüm Parfümler | realdekant",
+  description: "Orijinal designer ve niş parfümlerin steril dekant (deneme boyu) koleksiyonu. 3ml, 5ml ve 10ml boyut seçenekleriyle tüm parfümleri keşfedin.",
+  alternates: {
+    canonical: "/shop",
+  },
+};
 
 // Enable ISR caching (1 hour)
 export const revalidate = 3600;

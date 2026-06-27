@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     "parfüm örnekleri"
   ],
   icons: {
-    icon: "/logo.png",
+    icon: "/favicon.ico",
     shortcut: "/logo.png",
     apple: "/logo.png",
   },
@@ -59,13 +59,13 @@ export const metadata: Metadata = {
     siteName: "realdekant",
     title: "realdekant | Orijinal Parfüm Dekant Koleksiyonu",
     description:
-      "realdekant — %100 orijinal marka parfümlerden steril koşullarda hazırlanan lüks dekant (deneme boyu) koleksiyonu.",
+      "realdekant — %100 orijinal marka parfümlerden steril koşullarda özenle hazırlanan lüks dekant (deneme boyu) koleksiyonu. Creed, Tom Ford, Dior, Chanel ve daha fazlası.",
     images: [
       {
-        url: "/logo.png",
-        width: 512,
-        height: 512,
-        alt: "realdekant Logo",
+        url: "/images/og-banner.png",
+        width: 1200,
+        height: 630,
+        alt: "realdekant | Orijinal Parfüm Dekant Koleksiyonu",
       },
     ],
   },
@@ -73,8 +73,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "realdekant | Orijinal Parfüm Dekant Koleksiyonu",
     description:
-      "realdekant — %100 orijinal marka parfümlerden hazırlanan lüks dekant (deneme boyu) koleksiyonu.",
-    images: ["/logo.png"],
+      "realdekant — %100 orijinal marka parfümlerden steril koşullarda hazırlanan lüks dekant (deneme boyu) koleksiyonu.",
+    images: ["/images/og-banner.png"],
   },
   alternates: {
     canonical: "/",

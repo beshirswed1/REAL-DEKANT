@@ -1,23 +1,31 @@
-"use client";
+import React from "react";
+import type { Metadata } from "next";
+import { getSettingsConfig } from "@/lib/settings-cache";
 
-import React, { useState, useEffect } from "react";
+export const metadata: Metadata = {
+  title: "Mesafeli Satış Sözleşmesi | realdekant",
+  description: "Real Dekant internet sitesi üzerinden yapacağınız alışverişlere ilişkin mesafeli satış sözleşmesi şartları.",
+  alternates: {
+    canonical: "/distance-sales-agreement",
+  },
+};
 
-export default function DistanceSalesAgreementPage() {
-  const [email, setEmail] = useState("info@realdekant.com");
-  const [address, setAddress] = useState("İstanbul, Türkiye");
-  const [phone, setPhone] = useState("");
+export default async function DistanceSalesAgreementPage() {
+  let email = "info@realdekant.com";
+  let address = "İstanbul, Türkiye";
+  let phone = "";
   const currentYear = new Date().getFullYear();
 
-  useEffect(() => {
-    fetch("/api/settings")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.contactEmail) setEmail(data.contactEmail);
-        if (data.contactAddress) setAddress(data.contactAddress);
-        if (data.contactPhone) setPhone(data.contactPhone);
-      })
-      .catch((err) => console.error("Error fetching settings:", err));
-  }, []);
+  try {
+    const settings = await getSettingsConfig();
+    if (settings) {
+      if (settings.contactEmail) email = settings.contactEmail;
+      if (settings.contactAddress) address = settings.contactAddress;
+      if (settings.contactPhone) phone = settings.contactPhone;
+    }
+  } catch (err) {
+    console.error("Error fetching settings server-side in distance-sales-agreement page:", err);
+  }
 
   return (
     <div className="flex flex-col bg-cream-light text-charcoal min-h-screen overflow-x-hidden">
