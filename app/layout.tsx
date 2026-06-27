@@ -22,7 +22,7 @@ const dancing = Dancing_Script({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://realdekant.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://realdekant.vercel.app"),
   title: {
     default: "realdekant | Orijinal Parfüm Dekant Koleksiyonu",
     template: "%s | realdekant",
@@ -55,14 +55,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "tr_TR",
-    url: "https://realdekant.com",
+    url: "https://realdekant.vercel.app",
     siteName: "realdekant",
     title: "realdekant | Orijinal Parfüm Dekant Koleksiyonu",
     description:
       "realdekant — %100 orijinal marka parfümlerden steril koşullarda özenle hazırlanan lüks dekant (deneme boyu) koleksiyonu. Creed, Tom Ford, Dior, Chanel ve daha fazlası.",
     images: [
       {
-        url: "/images/og-banner.png",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "realdekant | Orijinal Parfüm Dekant Koleksiyonu",
@@ -74,7 +74,7 @@ export const metadata: Metadata = {
     title: "realdekant | Orijinal Parfüm Dekant Koleksiyonu",
     description:
       "realdekant — %100 orijinal marka parfümlerden steril koşullarda hazırlanan lüks dekant (deneme boyu) koleksiyonu.",
-    images: ["/images/og-banner.png"],
+    images: ["/og-image.png"],
   },
   alternates: {
     canonical: "/",
